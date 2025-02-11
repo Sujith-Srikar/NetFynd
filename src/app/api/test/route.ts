@@ -1,21 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/services/db";
-import User from "@/lib/models/User";
 import Investor from "@/lib/models/Investor";
 
 export async function POST(req: NextRequest) {
   await connectDB();
   try {
-    // Insert test users
-    await User.create([
-      { email: "user1@example.com" },
-      { email: "user2@example.com" },
-    ]);
 
     // Insert test investors/mentors
     await Investor.create([
-      { name: "Alice", category: "AI", type: "Investor" },
-      { name: "Bob", category: "Blockchain", type: "Mentor" },
+      { name: "Elon Musk", category: "Space Tech", type: "Investor" },
+      { name: "Bill Gates", category: "AI", type: "Investor" },
+      { name: "Mark Cuban", category: "Blockchain", type: "Investor" },
+      { name: "Naval Ravikant", category: "Startups", type: "Investor" },
+      { name: "Andreessen Horowitz", category: "Web3", type: "Investor" },
+      { name: "Chris Dixon", category: "Crypto", type: "Investor" },
+      { name: "Vinod Khosla", category: "Deep Tech", type: "Investor" },
+      { name: "Peter Thiel", category: "Fintech", type: "Investor" },
+      { name: "Reid Hoffman", category: "Social Networks", type: "Investor" },
+      { name: "Chamath Palihapitiya", category: "SaaS", type: "Investor" },
+      { name: "Sam Altman", category: "AI", type: "Mentor" },
+      { name: "Balaji Srinivasan", category: "Crypto", type: "Mentor" },
+      { name: "Marc Andreessen", category: "Web3", type: "Mentor" },
+      { name: "Eric Schmidt", category: "Cloud Computing", type: "Mentor" },
+      { name: "Tim Cook", category: "Consumer Tech", type: "Mentor" },
+      { name: "Sundar Pichai", category: "AI", type: "Mentor" },
+      { name: "Jeff Bezos", category: "E-commerce", type: "Investor" },
+      { name: "Brian Chesky", category: "Hospitality Tech", type: "Investor" },
+      { name: "Paul Graham", category: "Startups", type: "Mentor" },
+      { name: "Steve Wozniak", category: "Hardware", type: "Mentor" },
     ]);
 
     return NextResponse.json({ message: "Test users & investors inserted!" });
@@ -30,12 +42,10 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   await connectDB();
   try {
-    // Fetch all users
-    const users = await User.find();
     // Fetch all investors/mentors
     const investors = await Investor.find();
 
-    return NextResponse.json({ users, investors });
+    return NextResponse.json({ investors });
   } catch (error) {
     return NextResponse.json(
       { message: "Error fetching data", error },
