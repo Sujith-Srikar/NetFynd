@@ -1,10 +1,15 @@
 import nodemailer from "nodemailer";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-export async function POST(req: NextRequest) {
-  const { email } = await req.json();
+interface EmailRequestBody {
+  email: string;
+}
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  const { email } = (await req.json()) as EmailRequestBody;
   const rechargeEmail = process.env.GMAIL_USER;
 
   if (!email) {

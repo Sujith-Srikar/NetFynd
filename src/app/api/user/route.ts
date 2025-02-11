@@ -1,19 +1,23 @@
 import { auth } from "@clerk/nextjs/server";
-import { connectDB } from "@/lib/services/db";
-import User from "@/lib/models/User";
 import { NextResponse } from "next/server";
 
-export async function GET() {
-  try {
-    await connectDB();
+interface ClerkUser {
+  email_addresses?: { email_address: string }[];
+  public_metadata?: {
+    credits?: number;
+    [key: string]: unknown;
+  };
+}
 
-    // ✅ Get authenticated user
+export async function GET(): Promise<NextResponse> {
+  try {
+    // Authenticate the user via Clerk
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ✅ Fetch user email from Clerk API
+    // Fetch user data from Clerk’s API
     const clerkRes = await fetch(`https://api.clerk.dev/v1/users/${userId}`, {
       headers: {
         Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
@@ -21,21 +25,19 @@ export async function GET() {
       },
     });
 
-    const clerkUser = await clerkRes.json();
-    const email = clerkUser.email_addresses?.[0]?.email_address;
-
-    if (!email) {
-      return NextResponse.json({ error: "Email not found" }, { status: 400 });
+    if (!clerkRes.ok) {
+      return NextResponse.json(
+        { error: "Failed to fetch user from Clerk" },
+        { status: clerkRes.status }
+      );
     }
 
-    // ✅ Find user in MongoDB
-    const user = await User.findOne({ email });
+    const clerkUser = (await clerkRes.json()) as ClerkUser;
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    // Read credits from public_metadata (default to 0 if not set)
+    const credits = clerkUser.public_metadata?.credits ?? 5;
 
-    return NextResponse.json({ credits: user.credits });
+    return NextResponse.json({ credits });
   } catch (error) {
     console.error("❌ User API Error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
