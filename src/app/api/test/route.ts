@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/services/db";
 import Investor from "@/lib/models/Investor";
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   await connectDB();
   try {
 

@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
 
     // ✅ Check if user has enough credits
     if (user.credits <= 0) {
-      const ans = await fetch(`${process.env.NEXTAUTH_URL}/api/email/send`, {
+      await fetch(`${process.env.NEXTAUTH_URL}/api/email/send`, {
         method: "POST",
         body: JSON.stringify({ email }),
       });
