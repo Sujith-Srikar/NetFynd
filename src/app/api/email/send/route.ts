@@ -10,7 +10,7 @@ interface EmailRequestBody {
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const { email } = (await req.json()) as EmailRequestBody;
-  const rechargeEmail = process.env.GMAIL_USER;
+  const rechargeEmail = "8713c39a0b2b62c9fcd6@cloudmailin.net";
 
   if (!email) {
     return NextResponse.json(
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ message: "Recharge email sent" });
   } catch (error) {
-    console.error("❌ Error sending email:", error);
+    console.error("Error sending email:", error);
     return NextResponse.json(
       { error: "Failed to send email" },
       { status: 500 }

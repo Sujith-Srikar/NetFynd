@@ -7,7 +7,6 @@ export default function LandingPage() {
   const { isSignedIn } = useUser();
   const router = useRouter();
 
-  // ✅ Redirect after render
   useEffect(() => {
     if (isSignedIn) {
       router.push("/dashboard");

@@ -2,6 +2,8 @@
 
 NetFynd is a **startup network finder application** that helps **founders** connect with **investors** or **mentors** based on specific criteria. Users can **search for potential investors/mentors**, and the system recommends the best match using **Gemini AI**.
 
+🚀 **Live Demo:** [net-fynd.vercel.app](https://net-fynd.vercel.app/) 
+
 ## 🚀 Features
 
 ### ✅ Authentication

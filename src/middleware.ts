@@ -1,11 +1,20 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import {
+  clerkMiddleware,
+  createRouteMatcher,
+} from "@clerk/nextjs/server";
 
-const isPublic = createRouteMatcher(["/api/webhooks"]);
+const isPublic = createRouteMatcher(["/"]);
 
-export default clerkMiddleware((auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
+  // const { userId, redirectToSignIn } = await auth();
+
   if (isPublic(req)) {
-    return; // ✅ Skip auth for webhooks
+    return;
   }
+
+  // if (!userId) {
+  //   return redirectToSignIn();
+  // }
 });
 
 export const config = {

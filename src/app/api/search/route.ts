@@ -9,6 +9,7 @@ interface ClerkUser {
   email_addresses?: { email_address: string }[];
   public_metadata?: {
     credits?: number;
+    recharged?: boolean;
     [key: string]: unknown;
   };
 }
@@ -19,16 +20,13 @@ interface SearchRequestBody {
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    // Connect to MongoDB for investor data
     await connectDB();
 
-    // Authenticate the user via Clerk
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch user data from Clerk’s API
     const clerkRes = await fetch(`https://api.clerk.dev/v1/users/${userId}`, {
       headers: {
         Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
@@ -48,23 +46,22 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Email not found" }, { status: 400 });
     }
 
-    // Get credits from Clerk user metadata (default to 0)
     let credits = clerkUser.public_metadata?.credits ?? 5;
+    const recharged = clerkUser.public_metadata?.recharged;
 
-    // Check if user has enough credits
-    if (credits <= 0) {
-      // Trigger recharge email
+    if (credits == 1) {
       await fetch(`${process.env.NEXTAUTH_URL}/api/email/send`, {
         method: "POST",
         body: JSON.stringify({ email }),
       });
-      return NextResponse.json({ error: "No credits left" }, { status: 403 });
     }
 
-    // Deduct one credit
+    if(credits <= 0) {
+      return NextResponse.json({ error: "Check Your Email" }, { status: 403 });
+    }
+
     credits -= 1;
 
-    // Update Clerk user’s public_metadata with the new credits balance
     const updateRes = await fetch(`https://api.clerk.dev/v1/users/${userId}`, {
       method: "PATCH",
       headers: {
@@ -72,7 +69,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        public_metadata: { credits },
+        public_metadata: { credits, recharged },
       }),
     });
 
@@ -83,13 +80,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Process the search query
     const { query } = (await req.json()) as SearchRequestBody;
     if (!query) {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
-    // Fetch all investors from MongoDB
     const investors = await Investor.find();
     if (!investors || investors.length === 0) {
       return NextResponse.json(
@@ -98,18 +93,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Format investor data for the Gemini AI query
     const investorData = investors.map((inv: IInvestor) => ({
       name: inv.name,
       category: inv.category,
       type: inv.type,
     }));
 
-    // Initialize Gemini API
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    // Send query and investor data to Gemini AI
     const result = await model.generateContent(`
       We have the following investors:
       ${JSON.stringify(investorData)}
@@ -125,7 +117,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ result: bestInvestors });
   } 
   catch (error) {
-    console.error("❌ Search API Error:", error);
+    console.error("Search API Error:", error);
     return NextResponse.json(
       { error: "Something went wrong" },
       { status: 500 }
