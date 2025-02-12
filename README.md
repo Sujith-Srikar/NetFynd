@@ -26,13 +26,12 @@ NetFynd is a **startup network finder application** that helps **founders** conn
 ## 🛠 Tech Stack
 
 ### **Frontend**
-- **Next.js (React framework)**
+- **Next.js**
 - **Tailwind CSS** (for styling)
 - **Clerk Authentication** (Google Login)
 
 ### **Backend**
 - **Next.js API Routes** (Serverless backend)
-- **MongoDB** (Database)
 - **Gemini AI API** (for investor recommendations)
 - **Gmail API** (for credit recharge email detection)
 
