@@ -122,6 +122,7 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+      {credits === 0 && <p className="mt-4 text-blue-400">Check your email for credits</p>}
     </div>
   );
 }
